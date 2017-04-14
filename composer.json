@@ -1,0 +1,11 @@
+{
+    "name": "exus/simple_cms",
+    "description": "Simple CMS created from scratch",
+    "type": "project",
+    "license": "MIT",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6.1",
+        "mockery/mockery": "^0.9.9"
+    }
+}
