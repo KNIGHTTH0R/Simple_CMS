@@ -1,7 +1,8 @@
 <?php
 /*
-  Głowny plik routingu
+  Routing file
 */
+require_once 'Controller.php';
 
 class Routing {
   public static $default_controller = 'Default';
@@ -10,42 +11,59 @@ class Routing {
   {
     global $_BASE_PATH;
 
-    // Jeżeli brak parametrów
-    if(empty($uri)) return TRUE;
+    // If input array is empty
+    if(empty($uri)) Array(FALSE, 'error' => 'Empty route', 'error_id' => 1);
 
-    // Sprawdzanie czy plik kontrolera instnieje
-    if( ! file_exists($_BASE_PATH . 'src/Controllers/' . $uri[0] . '.php'))
+    // Checking if controller file exist
+    $controller_path = $_BASE_PATH . 'src/Controllers/' . $uri['controller'] . '.php';
+
+    if( ! file_exists($controller_path))
     {
-      return Array(FALSE, 'error' => 'Controller file doesn\'t exist');
+      return Array(FALSE, 'error' => 'Controller file doesn\'t exist. Path: ' . $controller_path, 'error_id' => 2);
     }
 
-    // Ładowanie kontrolera oraz tworzenie obiektu
-    require $_BASE_PATH . 'src/Controllers/' . $uri[0] . '.php';
+    // Loading controller file
+    require_once $controller_path;
 
-    // Sprwdzanie czy klasa kontrolera została zadeklarowana z poprawną nazwą
-    if( ! class_exists($uri[0]))
+    // Checking whether conroller class exist
+    if( ! class_exists($uri['controller']))
     {
-      return Array(FALSE, 'error' => 'Controller class name doesn\'t exist');
+      return Array(FALSE, 'error' => 'Controller class name doesn\'t exist', 'error_id' => 3);
     }
 
-    if( ! isset($uri[1])) return TRUE;
-
-    // Sprawdzanie czy metoda kontrolera istnieje
-    if( ! method_exists($uri[0], $uri[1]))
+    // Checking whether conroller class have selected method
+    if( ! method_exists($uri['controller'], $uri['method']))
     {
-      return Array(FALSE, 'error' => 'Controller method name doesn\'t exist');
+      return Array(FALSE, 'error' => 'Controller method name doesn\'t exist. Method name: ' . $uri['method'], 'error_id' => 4);
     }
 
-    return TRUE;
+    return Array(TRUE, 'error' => '', 'error_id' => 0);
   }
 
-  static function get_route() 
+  static function get_route()
   {
     //print_r(explode('/', $_SERVER['PATH_INFO'] . "/"));
 
-    if(preg_match_all('/\w+/', $_SERVER['PATH_INFO'], $match) > 0)
+    if(preg_match_all('/[^\/]+/', $_SERVER['REQUEST_URI'], $match) > 0)
     {
-      return $match[0];
+
+      // For nginx
+      if($match[0][0] != 'index.php')
+      {
+        array_unshift($match[0], 'index.php');
+      }
+
+      $returned_value = Array(
+        'complete_uri' => $match[0],
+        'controller' => (!empty($match[0][1]))? $match[0][1] : 'Welcome.php',
+        'method' => (!empty($match[0][2]))? $match[0][2] : 'start',
+        'args' => array_splice($match[0], 3)
+      );
+
+      // Changing first letter to uppercase in name of controller class
+      $returned_value['controller'][0] = strtoupper($returned_value['controller'][0]);
+
+      return $returned_value;
     }
     else
     {
@@ -57,17 +75,44 @@ class Routing {
 
   static function route()
   {
+    $uri = self::get_route();
 
+    if(!empty($uri))
+    {
+
+      // Checking whether route is correct
+      if(self::check_controller($uri)[0])
+      {
+        // Creating controller object
+        $controller = new $uri['controller'];
+
+        // Call specific method in controller
+        call_user_func(Array($controller, $uri['method']),
+                      ( isset($uri['args'][0]) )? $uri['args'][0] : NULL,
+                      ( ! empty($uri['args']) )? $uri['args'] : NULL
+        );
+      }
+      else
+      {
+        self::load_404();
+      }
+
+    }
+    else
+    {
+      // Load 404 page
+      self::load_404();
+    }
   }
 
   static function load_404()
   {
-
+    die('Simple_CMS: Error 404');
   }
 
   static function load_500()
   {
-
+    die('Simple_CMS: Error 500');
   }
 }
 
