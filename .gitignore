@@ -1,5 +1,16 @@
 composer.phar
 /vendor/
+/bower_components/
+
+#Smarty
+/src/Views/Smarty/Cache
+!/src/Views/Smarty/Cache/index.html
+
+/src/Views/Smarty/Compile_dir
+!/src/Views/Smarty/Compile_dir/index.html
+
+/src/Views/Smarty/Config
+!/src/Views/Smarty/Config/index.html
 
 # Commit your application's lock file http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file
 # You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
