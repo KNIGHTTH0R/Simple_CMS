@@ -2,7 +2,7 @@
 /*
   Routing file
 */
-require_once 'Controller.php';
+require_once $_BASE_PATH . 'src/Controller.php';
 
 class Routing {
   public static $default_controller = 'Default';
@@ -75,6 +75,8 @@ class Routing {
 
   static function route()
   {
+    global $_BASE_PATH;
+
     $uri = self::get_route();
 
     if(!empty($uri))
@@ -94,14 +96,21 @@ class Routing {
       }
       else
       {
+        //Default controller
         self::load_404();
       }
 
     }
     else
     {
-      // Load 404 page
-      self::load_404();
+      // Default controller
+      require_once $_BASE_PATH . 'src/Controllers/Welcome.php';
+
+      // Creating controller object
+      $controller = new Welcome();
+
+      // Call specific method in controller
+      call_user_func(Array($controller, 'start'));
     }
   }
 
