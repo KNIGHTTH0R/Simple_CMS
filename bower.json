@@ -1,0 +1,18 @@
+{
+  "name": "Simple_CMS",
+  "homepage": "https://github.com/Exus1/Simple_CMS",
+  "authors": [
+    "Karol Krupa <karo2krupa@gmail.com>"
+  ],
+  "description": "Simple CMS created from scratch",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
